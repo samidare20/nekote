@@ -1,6 +1,6 @@
 slint::include_modules!();
 
-use slint::{ModelRc, SharedString, VecModel};
+use slint::{Image, ModelRc, SharedString, VecModel};
 use std::fs;
 use std::path::Path;
 use std::rc::Rc;
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         window.set_folder_path(SharedString::from(folder_path.to_string_lossy().as_ref()));
 
-        let mut files: Vec<SharedString> = Vec::new();
+        let mut items: Vec<ImageItem> = Vec::new();
         if let Ok(entries) = fs::read_dir(&folder_path) {
             let mut entry_paths: Vec<_> = entries
                 .filter_map(|res| res.ok().map(|e| e.path()))
@@ -42,16 +42,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             for path in entry_paths {
                 if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                    files.push(SharedString::from(name));
+                    let thumbnail = Image::load_from_path(&path).unwrap_or_default();
+                    items.push(ImageItem {
+                        name: SharedString::from(name),
+                        thumbnail,
+                    });
                 }
             }
         }
 
-        let model = Rc::new(VecModel::from(files));
+        let model = Rc::new(VecModel::from(items));
         window.set_file_list(ModelRc::from(model));
     });
 
     main_window.run()?;
     Ok(())
 }
-

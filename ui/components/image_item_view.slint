@@ -1,0 +1,23 @@
+import { HorizontalBox } from "std-widgets.slint";
+import { ImageItem } from "../types.slint";
+
+export component ImageItemView inherits HorizontalBox {
+    in property <ImageItem> item;
+
+    spacing: 10px;
+    alignment: start;
+
+    Image {
+        source: root.item.thumbnail;
+        width: 64px;
+        height: 64px;
+        image-fit: contain;
+    }
+
+    Text {
+        text: root.item.name;
+        font-size: 14px;
+        vertical-alignment: center;
+    }
+}
+

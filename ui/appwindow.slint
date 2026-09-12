@@ -1,4 +1,8 @@
 import { Button, VerticalBox, HorizontalBox, ScrollView } from "std-widgets.slint";
+import { ImageItem } from "types.slint";
+import { ImageItemView } from "components/image_item_view.slint";
+
+export { ImageItem }
 
 export component MainWindow inherits Window {
     title: "nekote";
@@ -6,7 +10,7 @@ export component MainWindow inherits Window {
     min-height: 400px;
 
     in-out property <string> folder_path: "";
-    in-out property <[string]> file_list: [];
+    in-out property <[ImageItem]> file_list: [];
 
     callback open_folder_clicked();
 
@@ -34,15 +38,13 @@ export component MainWindow inherits Window {
         ScrollView {
             VerticalBox {
                 padding: 0px;
-                spacing: 4px;
+                spacing: 6px;
                 alignment: start;
 
-                for file in root.file_list : Text {
-                    text: file;
-                    font-size: 14px;
+                for item in root.file_list : ImageItemView {
+                    item: item;
                 }
             }
         }
     }
 }
-
