@@ -1,23 +1,75 @@
 import { HorizontalBox } from "std-widgets.slint";
 import { ImageItem } from "../types.slint";
 
-export component ImageItemView inherits HorizontalBox {
+export component ImageItemView inherits Rectangle {
     in property <ImageItem> item;
+    in property <int> index;
+    in property <data-transfer> drag-data;
 
-    spacing: 10px;
-    alignment: start;
+    callback drag-started(index: int);
+    callback drag-finished();
+    callback dropped-on(index: int, after: bool);
 
-    Image {
-        source: root.item.thumbnail;
-        width: 64px;
-        height: 64px;
-        image-fit: contain;
+    height: 72px;
+    border-radius: 4px;
+    background: drop-area.has-drag ? #dbeafe : drag-area.dragging ? #e5e7eb : #00000000;
+
+    HorizontalBox {
+        padding: 4px;
+        spacing: 10px;
+        alignment: start;
+
+        Image {
+            source: root.item.thumbnail;
+            width: 64px;
+            height: 64px;
+            image-fit: contain;
+        }
+
+        VerticalLayout {
+            spacing: 2px;
+
+            Text {
+                text: root.item.name;
+                font-size: 14px;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+
+            Text {
+                text: "→ " + root.item.preview_name;
+                font-size: 14px;
+                color: #2563eb;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+        }
     }
 
-    Text {
-        text: root.item.name;
-        font-size: 14px;
-        vertical-alignment: center;
+    drop-area := DropArea {
+        can-drop(event) => {
+            return DragAction.move;
+        }
+
+        dropped(event) => {
+            root.dropped-on(root.index, event.position.y >= root.height / 2);
+            return event.proposed-action;
+        }
+
+        drag-area := DragArea {
+            data: root.drag-data;
+            allow-move: true;
+            drag-finished(action) => {
+                root.drag-finished();
+            }
+
+            TouchArea {
+                pointer-event(event) => {
+                    if (event.button == PointerEventButton.left && event.kind == PointerEventKind.down) {
+                        root.drag-started(root.index);
+                    }
+                }
+            }
+        }
     }
 }
-

@@ -2867,6 +2867,7 @@ dependencies = [
 name = "nekote"
 version = "0.1.0"
 dependencies = [
+ "i-slint-core",
  "rfd",
  "slint",
  "slint-build",

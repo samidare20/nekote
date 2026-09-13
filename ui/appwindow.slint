@@ -11,8 +11,12 @@ export component MainWindow inherits Window {
 
     in-out property <string> folder_path: "";
     in-out property <[ImageItem]> file_list: [];
+    in-out property <data-transfer> drag_data;
+    in-out property <int> dragging_index: -1;
 
     callback open_folder_clicked();
+    callback prepare_drag(index: int);
+    callback reorder_requested(from: int, to: int, after: bool);
 
     VerticalBox {
         padding: 10px;
@@ -35,14 +39,36 @@ export component MainWindow inherits Window {
             }
         }
 
+        Text {
+            text: root.file_list.length == 0
+                ? "이미지가 없습니다."
+                : "행의 위쪽/아래쪽에 놓아 각각 앞/뒤에 삽입하세요. 파란색 이름은 적용 전 예상 파일명입니다.";
+            color: #4b5563;
+            font-size: 13px;
+        }
+
         ScrollView {
             VerticalBox {
                 padding: 0px;
                 spacing: 6px;
                 alignment: start;
 
-                for item in root.file_list : ImageItemView {
+                for item[index] in root.file_list : ImageItemView {
                     item: item;
+                    index: index;
+                    drag-data: root.drag_data;
+                    drag-started(index) => {
+                        root.dragging_index = index;
+                        root.prepare_drag(index);
+                    }
+                    drag-finished() => {
+                        root.dragging_index = -1;
+                    }
+                    dropped-on(index, after) => {
+                        if (root.dragging_index != -1 && root.dragging_index != index) {
+                            root.reorder_requested(root.dragging_index, index, after);
+                        }
+                    }
                 }
             }
         }
